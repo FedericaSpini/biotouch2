@@ -480,7 +480,7 @@ if __name__ == '__main__':
 
 
     # d = DataManager(Utils.DATASET_NAME_1, update_data=False)
-    d = AnonymousDataManager(Utils.DATASET_NAME_3, update_data=False)
+    d = AnonymousDataManager(Utils.DATASET_NAME_2, update_data=False)
 
     # a = Utils.get_wordidfrom_wordnumber_name_surname(d[Utils.WORDID_USERID], d[Utils.USERID_USERDATA], "Rita", "Battilocchi" , Utils.BLOCK_LETTER, 31)
     # print(Utils.get_infos(d[Utils.WORDID_USERID], d[Utils.USERID_USERDATA], a))
