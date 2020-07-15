@@ -37,6 +37,7 @@ class TimeSeriesManager:
         self.dataset_name = dataset_name
         self.data_frames = {}
         self.data_time_series = {}
+        self.data_classes = []
 
         self._load_time_series(update_data, update_features)
 
@@ -78,6 +79,7 @@ class TimeSeriesManager:
             return
         else:
             self._extract_series_from_dataframes()
+            "FATTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"
             self._load_features(False, False)
 
     def _read_pickles(self):
@@ -89,6 +91,7 @@ class TimeSeriesManager:
     def _extract_series_from_dataframes(self):
         words_id_list = list(range(len(self.data_frames[Utils.WORDID_USERID])))
         for label in Utils.POINTS_SERIES_TYPE:
+            # todo: DEVI OTTENERE LA SERIE (NON TEMPORALE) ANCHE DELLE CLASSI CORRETTE
             chrono = Chronom.Chrono("Extracting time series from {}...".format(label), True)
             series_split_by_word_id = []
             for i in words_id_list:
@@ -96,9 +99,14 @@ class TimeSeriesManager:
                 series_split_by_word_id.append(df[df['word_id']==i])
             self.data_time_series[label] = series_split_by_word_id
             chrono.end()
+        self.data_classes = self.data_frames[Utils.WORDID_USERID].tolist()
+        print('\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(type(self.data_classes))
+        # print(self.data_frames[Utils.WORDID_USERID].tolist())
+        print('\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         # print(self.data_time_series['movementPoints'][0], '    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(self.data_time_series['movementPoints'][0], '    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(len(self.data_time_series))
+        # print(self.data_time_series['movementPoints'][0], '    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        # print(len(self.data_time_series))
 
     def _save_features(self, to_csv=True):
         Utils.save_dataframes(self.dataset_name, self.data_time_series, Utils.FEATURE, "Saving features...",

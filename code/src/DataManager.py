@@ -7,7 +7,7 @@ import src.Chronometer as Chronom
 import src.Utils as Utils
 
 DATAFRAME_FROM_JSON = [Utils.WORDID_USERID, Utils.USERID_USERDATA] + Utils.INITIAL_POINTS_SERIES_TYPE
-DATAFRAMES = [Utils.WORDID_USERID, Utils.USERID_USERDATA] + Utils.POINTS_SERIES_TYPE
+# DATAFRAMES = [Utils.WORDID_USERID, Utils.USERID_USERDATA] + Utils.POINTS_SERIES_TYPE
 
 class AnonymousDataManager:
     @staticmethod
@@ -43,7 +43,7 @@ class AnonymousDataManager:
 
     @staticmethod
     def _check_saved_pickles(dataset_name):
-        for label in DATAFRAMES:
+        for label in Utils.DATAFRAMES:
             if not Utils.os.path.isfile(Utils.BUILD_DATAFRAME_PICKLE_PATH(dataset_name, label)):
                 return False
         return True
@@ -213,7 +213,7 @@ class AnonymousDataManager:
 
     def _read_pickles(self):
         chrono = Chronom.Chrono("Reading dataframes...")
-        for label in DATAFRAMES:
+        for label in Utils.DATAFRAMES:
             self.data_frames[label] = pandas.read_pickle(Utils.BUILD_DATAFRAME_PICKLE_PATH(self.dataset_name, label))
         chrono.end()
 

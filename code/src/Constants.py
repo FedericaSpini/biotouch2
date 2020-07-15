@@ -144,6 +144,9 @@ POINTS_SERIES_TYPE = TIMED_POINTS_SERIES_TYPE + [SAMPLED_POINTS,
                                                  Y_SHIFTED_SAMPLED_POINTS,
                                                  XY_SHIFTED_SAMPLED_POINTS]
 
+DATAFRAMES = [WORDID_USERID, USERID_USERDATA] + POINTS_SERIES_TYPE
+DATA_SERIES =[WORDID_USERID] + POINTS_SERIES_TYPE
+
 # files constants
 ROOT_FOLDER = ".."
 BASE_FOLDER = "../res/"
