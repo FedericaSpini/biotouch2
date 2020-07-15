@@ -151,8 +151,8 @@ _RES_SUFFIX = "_res/"
 
 # DATASET_NAME_0 = "Biotouch"
 # DATASET_NAME_1 = "MiniBiotouch"
-DATASET_NAME_2 = "Anonymous_Biotouch"
-DATASET_NAME_3 = "MiniAnonymous_Biotouch"
+DATASET_NAME = "Anonymous_Biotouch"
+MINI_DATASET_NAME = "MiniAnonymous_Biotouch"
 #DATASET_NAME_1 = "Biotouch_sara"
 #DATASET_NAME_SMALL = "small"
 

@@ -7,7 +7,7 @@ import numpy
 
 import src.Constants
 import random
-import src.FeatureManager as fm
+import src.TimeSeriesManager as fm
 from src import Utils
 
 LEARNING_FROM = Utils.TIMED_POINTS_SERIES_TYPE
@@ -88,7 +88,7 @@ class DTWWordClassifier:
         self.handwriting = handwriting
 
         #the object wich manages extracts features
-        self.feature_manager = fm.FeaturesManager(dataset_name, update_data, anonymous=anonymous)
+        self.feature_manager = fm.TimeSeriesManager(dataset_name, update_data, anonymous=anonymous)
 
         # features is a dictionary which maps the type of temporary series of points
         # (for example "xy_shifted_touchDownPoints" to a pandas' dataframe table, that
