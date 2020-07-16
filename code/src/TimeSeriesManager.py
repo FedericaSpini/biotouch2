@@ -15,7 +15,7 @@ import src.Utils as Utils
 
 class TimeSeriesManager:
 
-    def __init__(self, dataset_name, update_data=False, update_features=False, anonymous=False):
+    def __init__(self, dataset_name, update_data=False, update_features=False):
         update_features = update_features or update_data
 
         self.dataset_name = dataset_name
@@ -23,6 +23,12 @@ class TimeSeriesManager:
         self.data_series = {}
 
         self._load_time_series(update_data, update_features)
+
+    def get_series(self):
+        return self.data_series
+
+    def get_classes(self):
+        return self.data_series[Utils.WORDID_USERID]
 
     def _load_time_series(self, update_data, update_series):
         self.data_frames = dm.AnonymousDataManager(self.dataset_name, update_data).get_dataframes()
