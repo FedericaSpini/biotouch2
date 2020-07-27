@@ -226,6 +226,7 @@ if __name__ == '__main__':
 
     print(d.dataset_name, "\n\n")
     print(type(d.data_frames['wordid_userid_map']),d.data_frames.keys(), "\n\n")
+
     # print(d.data_frames['wordid_userid_map'])
     print(d.data_frames['movementPoints'][['x', 'y', 'time']])
     # a = Utils.get_wordidfrom_wordnumber_name_surname(d[Utils.WORDID_USERID], d[Utils.USERID_USERDATA], "Rita", "Battilocchi" , Utils.BLOCK_LETTER, 31)

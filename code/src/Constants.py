@@ -218,3 +218,6 @@ BUILD_CHART3D_PATH =    lambda dataset_name, name, surname, word, handwriting,ti
 
 BUILD_RESULTS_HAND_FOLDER = lambda res, modality, hand: os.path.join(res, modality, hand)
 BUILD_RESULTS_PATH = lambda results_folder, handwriting, name, desc: BUILD_FILE_PATH(results_folder, handwriting + "_" + name, desc, PNG_EXTENSION)
+
+RES_FOLDER_PATH = os.path.dirname(os.path.realpath(__file__)).replace('src','res\\')
+RES_DTW_DISTANCES = 'DTW_DST'
