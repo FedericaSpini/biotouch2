@@ -63,9 +63,9 @@ class DTWWordClassifier:
         matrix = numpy.empty((n, m))
         matrix[:] = numpy.inf
         matrix[0][0] = 0
-        for i in range(1, n):
+        for i in range(0, n):
             point1 = s1.iloc[i].to_numpy()
-            for j in range(1, m):
+            for j in range(0, m):
                 point2 = s2.iloc[j].to_numpy()
                 # p1_p2_dist = distance.euclidean(point1, point2)
                 p1_p2_dist = math.sqrt(((point1[0]-point2[0])**2)+(point1[1]-point2[1])**2)
@@ -73,7 +73,7 @@ class DTWWordClassifier:
                     matrix[i][j] = p1_p2_dist + matrix[i][j-1]
                 elif (i > 0) and (j == 0):
                     matrix[i][j] = p1_p2_dist + matrix[i-1][j]
-                else:
+                elif(i!=0) and (j!=0):
                     matrix[i][j] = p1_p2_dist + min(matrix[i - 1][j - 1],
                                                             min(matrix[i - 1][j],
                                                                 matrix[i][j - 1]))
@@ -93,9 +93,9 @@ class DTWWordClassifier:
         matrix = numpy.empty((n, m))
         matrix[:] = numpy.inf
         matrix[0][0] = 0
-        for i in range(1, n):
+        for i in range(0, n):
             point1 = s1.iloc[i].to_numpy()
-            for j in range(1, m):
+            for j in range(0, m):
                 point2 = s2.iloc[j].to_numpy()
                 # p1_p2_dist = distance.euclidean(point1, point2)
                 p1_p2_dist = math.sqrt(((point1[0]-point2[0])**2)+(point1[1]-point2[1])**2)
@@ -103,11 +103,29 @@ class DTWWordClassifier:
                     matrix[i][j] = p1_p2_dist + matrix[i][j-1]
                 elif (i > 0) and (j == 0):
                     matrix[i][j] = p1_p2_dist + matrix[i-1][j]
-                else:
+                elif (i != 0) and (j != 0):
                     matrix[i][j] = p1_p2_dist + min(matrix[i - 1][j - 1],
                                                             min(matrix[i - 1][j],
                                                                 matrix[i][j - 1]))
-        return matrix[n-1][m-1]
+        print("MATRICE COSTRUITA!")
+        different_component_count = 0
+        last_cell_x, last_cell_y = n-1, m-1
+        while (last_cell_x != 0) or (last_cell_y != 0):
+            print(last_cell_x, last_cell_y)
+            p1_component, p2_component = self.considered_time_series_components[sample_index].iloc[last_cell_x].to_numpy(), self.considered_time_series_components[sample_2_index].iloc[last_cell_y].to_numpy()
+            if p1_component != p2_component:
+                different_component_count += 1
+            sx, up, diag = matrix[last_cell_x-1][last_cell_y], matrix[last_cell_x][last_cell_y-1], matrix[last_cell_x-1][last_cell_y-1]
+            next_val = min(sx, up, diag)
+            if sx == next_val:
+                last_cell_x -= 1
+            elif up == next_val:
+                last_cell_y -= 1
+            else:
+                last_cell_y -= 1
+                last_cell_x -= 1
+        print(different_component_count)
+        return matrix[n-1][m-1], different_component_count
 
     def filter_time_series_by_x_y(self, time_series):
         filtered_time_series = []
@@ -146,7 +164,7 @@ class DTWWordClassifier:
                         if not use_component:
                             val = self.get_DTW_distance(sample_index, ind)
                         else:
-                            val = self.get_DTW_distance_connected_component(sample_index, ind)
+                            val, component_dist = self.get_DTW_distance_connected_component(sample_index, ind)
                         outF.write(str(ind)+','+str(val)+'\n')
                         sum += val
                         if val < min:
@@ -175,7 +193,7 @@ class DTWWordClassifier:
             os.mkdir(test_directory_path+'\\'+self.considered_time_series_name)
             with mp.Pool(mp.cpu_count()) as p:
                 # print(p.map(self.get_DTW_dist_sample_to_class, list(range(len(self.classes)))))
-                res = (p.map(a.get_DTW_dist_sample_to_class, [0, 1, 2]))
+                res = (p.map(a.get_DTW_dist_sample_to_class, [0]))
                 # print('\n\n\n\n',type(res), len(res), res)
             finish = time.time()
             print('FINISH MAPPING SERIES NUMBER: ', s_n, ' in ', finish-start, ' seconds')
