@@ -79,7 +79,6 @@ class DTWWordClassifier:
                                                                 matrix[i][j - 1]))
         return matrix[n-1][m-1]
 
-    # TODO metodo da fare per la De Marsico!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def get_DTW_distance_connected_component(self, sample_index, sample_2_index):
         """
         :param s1: the dataframe representing one time series of a handwriting sample
@@ -97,6 +96,7 @@ class DTWWordClassifier:
             point1 = s1.iloc[i].to_numpy()
             for j in range(0, m):
                 point2 = s2.iloc[j].to_numpy()
+                # p1_p2_dist = numpy.linalg.norm(point1-point2)
                 # p1_p2_dist = distance.euclidean(point1, point2)
                 p1_p2_dist = math.sqrt(((point1[0]-point2[0])**2)+(point1[1]-point2[1])**2)
                 if (i == 0) and (j > 0):
@@ -107,16 +107,16 @@ class DTWWordClassifier:
                     matrix[i][j] = p1_p2_dist + min(matrix[i - 1][j - 1],
                                                             min(matrix[i - 1][j],
                                                                 matrix[i][j - 1]))
-        print("MATRICE COSTRUITA!")
         different_component_count = 0
+        total_couple_count = 1
         last_cell_x, last_cell_y = n-1, m-1
         while (last_cell_x != 0) or (last_cell_y != 0):
-            print(last_cell_x, last_cell_y)
             p1_component, p2_component = self.considered_time_series_components[sample_index].iloc[last_cell_x].to_numpy(), self.considered_time_series_components[sample_2_index].iloc[last_cell_y].to_numpy()
             if p1_component != p2_component:
                 different_component_count += 1
             sx, up, diag = matrix[last_cell_x-1][last_cell_y], matrix[last_cell_x][last_cell_y-1], matrix[last_cell_x-1][last_cell_y-1]
             next_val = min(sx, up, diag)
+            total_couple_count += 1
             if sx == next_val:
                 last_cell_x -= 1
             elif up == next_val:
@@ -124,8 +124,7 @@ class DTWWordClassifier:
             else:
                 last_cell_y -= 1
                 last_cell_x -= 1
-        print(different_component_count)
-        return matrix[n-1][m-1], different_component_count
+        return matrix[n-1][m-1], different_component_count, total_couple_count
 
     def filter_time_series_by_x_y(self, time_series):
         filtered_time_series = []
@@ -147,9 +146,9 @@ class DTWWordClassifier:
             total_class_set = set(self.classes)
             class_set = set()
             # sample = self.considered_time_series[sample_index]
-            correct_class = self.classes[sample_index]
-            min_distances = {}
-            avg_distances = {}
+            # correct_class = self.classes[sample_index]
+            # min_distances = {}
+            # avg_distances = {}
             for c in total_class_set:
                 if filter_by_handwriting in c:
                     class_set.add(c)
@@ -163,16 +162,17 @@ class DTWWordClassifier:
                     if (ind > sample_index):
                         if not use_component:
                             val = self.get_DTW_distance(sample_index, ind)
+                            outF.write(str(ind)+','+str(val)+'\n')
                         else:
-                            val, component_dist = self.get_DTW_distance_connected_component(sample_index, ind)
-                        outF.write(str(ind)+','+str(val)+'\n')
+                            val, component_dist, path_length = self.get_DTW_distance_connected_component(sample_index, ind)
+                            outF.write(str(ind)+','+str(val)+','+str(component_dist)+','+str(path_length)+'\n')
                         sum += val
                         if val < min:
                             min = val
-                avg_distances[c] = sum/len(indices)
-                min_distances[c] = min
+                # avg_distances[c] = sum/len(indices)
+                # min_distances[c] = min
             outF.close()
-            print ('\nDISTANCES FOR THE ', sample_index, ' SAMPLE: ', correct_class, '\nAVG_DISTANCES: ', avg_distances, '\nMIN_DISTANCES: ', min_distances)
+            print ('\nDISTANCES FOR THE ', sample_index, ' SAMPLE have been found!')
         return 0
 
 
@@ -192,13 +192,20 @@ class DTWWordClassifier:
             self.set_considered_time_series_name(temporary_series_names[s_n])
             os.mkdir(test_directory_path+'\\'+self.considered_time_series_name)
             with mp.Pool(mp.cpu_count()) as p:
-                # print(p.map(self.get_DTW_dist_sample_to_class, list(range(len(self.classes)))))
-                res = (p.map(a.get_DTW_dist_sample_to_class, [0]))
+                lista_totali = list(range(len(self.classes)))
+                lista_calcolati = [0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 72, 73, 76,
+                                   128, 129, 130, 131, 139, 140, 145, 192, 193, 194, 195,
+                                   196, 207, 208, 209, 216, 256, 257, 258, 259, 274, 275,
+                                   285, 320, 321, 322, 323, 341, 342, 384, 385, 386, 387, 
+                                   388, 389, 409, 410, 411, 448, 449, 450, 451, 452, 455,
+                                   456, 479, 453, 454, 512, 513, 514]
+                print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali if x not in lista_calcolati]))
+                # res = (p.map(a.get_DTW_dist_sample_to_class, [0,1,2]))
                 # print('\n\n\n\n',type(res), len(res), res)
             finish = time.time()
             print('FINISH MAPPING SERIES NUMBER: ', s_n, ' in ', finish-start, ' seconds')
 
 
 if __name__ == '__main__':
-    a = DTWWordClassifier(Utils.MINI_DATASET_NAME, Utils.ITALIC)
+    a = DTWWordClassifier(Utils.DATASET_NAME, Utils.ITALIC)
     a.make_DTW_distances_tables([a.get_samples('movementPoints')], ['movementPoints_filtered_by_x_y'])
