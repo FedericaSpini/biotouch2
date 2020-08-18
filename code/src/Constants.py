@@ -221,3 +221,4 @@ BUILD_RESULTS_PATH = lambda results_folder, handwriting, name, desc: BUILD_FILE_
 
 RES_FOLDER_PATH = os.path.dirname(os.path.realpath(__file__)).replace('src','res\\')
 RES_DTW_DISTANCES = 'DTW_DST'
+FINAL_DTW_DISTANCES = 'DTW_DATASET_DISTANCES'

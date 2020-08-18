@@ -145,10 +145,6 @@ class DTWWordClassifier:
             print('\nSTART TO FIND DISTANCES WITH CLASSES FOR THE ', sample_index, ' SAMPLE')
             total_class_set = set(self.classes)
             class_set = set()
-            # sample = self.considered_time_series[sample_index]
-            # correct_class = self.classes[sample_index]
-            # min_distances = {}
-            # avg_distances = {}
             for c in total_class_set:
                 if filter_by_handwriting in c:
                     class_set.add(c)
@@ -169,8 +165,6 @@ class DTWWordClassifier:
                         sum += val
                         if val < min:
                             min = val
-                # avg_distances[c] = sum/len(indices)
-                # min_distances[c] = min
             outF.close()
             print ('\nDISTANCES FOR THE ', sample_index, ' SAMPLE have been found!')
         return 0
@@ -193,15 +187,8 @@ class DTWWordClassifier:
             os.mkdir(test_directory_path+'\\'+self.considered_time_series_name)
             with mp.Pool(mp.cpu_count()) as p:
                 lista_totali = list(range(len(self.classes)))
-                lista_calcolati = [0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 72, 73, 76,
-                                   128, 129, 130, 131, 139, 140, 145, 192, 193, 194, 195,
-                                   196, 207, 208, 209, 216, 256, 257, 258, 259, 274, 275,
-                                   285, 320, 321, 322, 323, 341, 342, 384, 385, 386, 387, 
-                                   388, 389, 409, 410, 411, 448, 449, 450, 451, 452, 455,
-                                   456, 479, 453, 454, 512, 513, 514]
+                lista_calcolati =[]
                 print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali if x not in lista_calcolati]))
-                # res = (p.map(a.get_DTW_dist_sample_to_class, [0,1,2]))
-                # print('\n\n\n\n',type(res), len(res), res)
             finish = time.time()
             print('FINISH MAPPING SERIES NUMBER: ', s_n, ' in ', finish-start, ' seconds')
 
