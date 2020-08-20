@@ -59,9 +59,7 @@ class AnonymousDataManager:
 
     def __init__(self, dataset_name, update_data=False):
         self.dataset_name = dataset_name
-
         self._jsons_data = []
-
         # useful for test purposes
         self._idword_dataword_mapping = {}
 
@@ -71,7 +69,6 @@ class AnonymousDataManager:
                             Utils.TOUCH_UP_POINTS: {x: [] for x in Utils.TIMED_POINTS_WITH_WORD_ID},
                             Utils.TOUCH_DOWN_POINTS: {x: [] for x in Utils.TIMED_POINTS_WITH_WORD_ID},
                             Utils.SAMPLED_POINTS: {x: [] for x in Utils.POINTS_WITH_WORD_ID}}
-
         self.data_frames = {Utils.WORDID_USERID: None,
                             Utils.USERID_USERDATA: None,
                             Utils.MOVEMENT_POINTS: None,
@@ -93,14 +90,12 @@ class AnonymousDataManager:
                             Utils.XY_SHIFTED_TOUCH_DOWN_POINTS: None,
                             Utils.XY_SHIFTED_TOUCH_UP_POINTS: None,
                             Utils.XY_SHIFTED_SAMPLED_POINTS: None}
-
         self._data_to_dict_funs = {Utils.WORDID_USERID: None,
                                    Utils.USERID_USERDATA: None,
                                    Utils.MOVEMENT_POINTS: AnonymousDataManager._dict_of_list_from_timed_points,
                                    Utils.TOUCH_UP_POINTS: AnonymousDataManager._dict_of_list_from_timed_points,
                                    Utils.TOUCH_DOWN_POINTS: AnonymousDataManager._dict_of_list_from_timed_points,
                                    Utils.SAMPLED_POINTS: AnonymousDataManager._dict_of_list_from_untimed_points}
-
         self._dict_to_frames_funs = {Utils.WORDID_USERID: lambda x: pandas.Series(x, name=Utils.USER_ID),
                                      Utils.USERID_USERDATA: AnonymousDataManager._dataframe_from_nested_dict,
                                      Utils.MOVEMENT_POINTS: pandas.DataFrame,
@@ -110,7 +105,6 @@ class AnonymousDataManager:
 
         # {word_id: (minX, minY) }
         self.shift_offsets = {}
-
         self._load_dataframes(update_data)
 
     def get_dataframes(self):

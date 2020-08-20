@@ -13,7 +13,7 @@ LEARNING_FROM = Utils.TIMED_POINTS_SERIES_TYPE
 # MOVEMENT_WEIGHT = 0.75
 
 
-class DTWWordClassifier:
+class DTWDistanceFinder:
 
     def __init__(self, dataset_name, handwriting, update_data=False):
         self.dataset_name = dataset_name
@@ -188,11 +188,12 @@ class DTWWordClassifier:
             with mp.Pool(mp.cpu_count()) as p:
                 lista_totali = list(range(len(self.classes)))
                 lista_calcolati =[]
-                print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali if x not in lista_calcolati]))
+                # print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali if x not in lista_calcolati]))
+                print(p.map(self.get_DTW_dist_sample_to_class, [x for x in [132, 529, 916]]))
             finish = time.time()
             print('FINISH MAPPING SERIES NUMBER: ', s_n, ' in ', finish-start, ' seconds')
 
 
 if __name__ == '__main__':
-    a = DTWWordClassifier(Utils.DATASET_NAME, Utils.ITALIC)
+    a = DTWDistanceFinder(Utils.DATASET_NAME, Utils.ITALIC)
     a.make_DTW_distances_tables([a.get_samples('movementPoints')], ['movementPoints_filtered_by_x_y'])
