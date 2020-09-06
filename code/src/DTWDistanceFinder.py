@@ -22,7 +22,7 @@ class DTWDistanceFinder:
         self.time_series_manager = sm.TimeSeriesManager(dataset_name, update_data)
 
         self.series = self.time_series_manager.get_series()
-        self.classes = self.time_series_manager.get_classes()
+        self.classes = self.time_series_manager.get_samples_id()
 
         self.considered_time_series = None
         self.considered_time_series_components = None
@@ -188,8 +188,8 @@ class DTWDistanceFinder:
             with mp.Pool(mp.cpu_count()) as p:
                 lista_totali = list(range(len(self.classes)))
                 lista_calcolati =[]
-                # print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali if x not in lista_calcolati]))
-                print(p.map(self.get_DTW_dist_sample_to_class, [x for x in [132, 529, 916]]))
+                print(p.map(self.get_DTW_dist_sample_to_class, [x for x in lista_totali]))
+                # print(p.map(self.get_DTW_dist_sample_to_class, [x for x in [132, 529, 916]]))
             finish = time.time()
             print('FINISH MAPPING SERIES NUMBER: ', s_n, ' in ', finish-start, ' seconds')
 

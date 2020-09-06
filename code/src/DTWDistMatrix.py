@@ -40,12 +40,5 @@ class DTWDistMatrix:
     def get_couples_to_dist(self):
         return self.couples_to_dist
 
-    # def get_smaller_dist (self, s):
-    #     for
-
-
-
-
-
 if __name__ == '__main__':
     matrix = DTWDistMatrix(Utils.DATASET_NAME)

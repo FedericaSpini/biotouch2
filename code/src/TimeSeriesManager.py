@@ -27,7 +27,7 @@ class TimeSeriesManager:
     def get_series(self):
         return self.data_series
 
-    def get_classes(self):
+    def get_samples_id(self):
         return self.data_series[Utils.WORDID_USERID]
 
     def _load_time_series(self, update_data, update_series):
