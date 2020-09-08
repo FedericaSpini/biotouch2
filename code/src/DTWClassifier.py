@@ -27,24 +27,6 @@ class DTWClassifier:
         for label in self.dtwstMatrix.get_label_set():
             cc[label] = classes[label]
         return cc
-    #
-    # def classify_by_min_dist(self):
-    #     classification = {}
-    #     for s1 in self.dtwstMatrix.get_label_set():
-    #         min_distance = numpy.inf
-    #         correct_class = ''
-    #         for s2 in self.dtwstMatrix.get_label_set():
-    #             if (s1 != s2):
-    #                 if (s1, s2) in self.dtwstMatrix.get_couples_to_dist():
-    #                     distance = self.dtwstMatrix.get_dist(s1, s2)[0]
-    #                     if(distance<min_distance):
-    #                         min_distance = distance
-    #                         correct_class = self.correct_classification[s2]
-    #                 else:
-    #                     if (s1 != s2):
-    #                         print('\nTHE COUPLE: ', s1, ' - ',s2,' IS NOT IN THE DATASET!!!\n')
-    #         classification[s1] = correct_class
-    #     return classification
 
     def get_classes_number(self):
         return len(self.get_classes_set())
@@ -60,11 +42,8 @@ class DTWClassifier:
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             min_dist_dict = {}
-            # min_distance = numpy.inf
-            # correct_class = ''
-            # print(type(s1), s1)
             for s2 in self.dtwstMatrix.get_label_set():
-                if (s1 != s2):
+                if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     if s2_class in min_dist_dict:
                         if self.dtwstMatrix.get_dist(s1, s2)[0] < min_dist_dict[s2_class]:
@@ -74,28 +53,30 @@ class DTWClassifier:
             classification[s1] = min_dist_dict
         return classification
 
-    def classify_by_min_dist_connected_components(self, w):
+    def classify_by_min_dist_connected_components(self, w=0.5):
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
-            min_distance = numpy.inf
-            correct_class = ''
+            min_dist_dict = {}
             for s2 in self.dtwstMatrix.get_label_set():
                 if (s1 != s2):
-                    if (s1, s2) in self.dtwstMatrix.get_couples_to_dist():
-                        d = self.dtwstMatrix.get_dist(s1, s2)
-                        connected_component_factor = 0
-                        if d[1] == 0:
-                            connected_component_factor = 1
-                        else:
-                            connected_component_factor = ((float(d[2]))/(float(d[1])))
-                        distance = d[0] * connected_component_factor
-                        if(distance<min_distance):
-                            min_distance = distance
-                            correct_class = self.correct_classification[s2]
+                    s2_class = self.correct_classification[s2]
+                    d = self.dtwstMatrix.get_dist(s1, s2)
+                    if d[1] == 0:
+                        dist = d[0]
                     else:
-                        if (s1 != s2):
-                            print('\nTHE COUPLE: ', s1, ' - ',s2,' IS NOT IN THE DATASET!!!\n')
-            classification[s1] = correct_class
+                        # dist = d[0] * (1-((float(d[1])) / (float(d[2]))))
+                        # dist = d[0] * (((float(d[1])) / (float(d[2]))))
+                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))
+                        # dist = d[0]
+                        dist = (d[0]*(1-w)) + (d[0] * (1-((float(d[1])) / (float(d[2])))) * w)
+                        print('\n')
+                        print(d, dist)
+                    if s2_class in min_dist_dict:
+                        if self.dtwstMatrix.get_dist(s1, s2)[0] < min_dist_dict[s2_class]:
+                            min_dist_dict[s2_class] = dist
+                    else:
+                        min_dist_dict[s2_class] = dist
+            classification[s1] = min_dist_dict
         return classification
 
     def classify_by_avg_dist(self):
@@ -103,30 +84,50 @@ class DTWClassifier:
         for s1 in self.dtwstMatrix.get_label_set():
             classes_sum_value = {}
             classes_sample_number = {}
-            classes_avg_values = {}
+            avg_dist_dict = {}
             for s2 in self.dtwstMatrix.get_label_set():
                 if s1 != s2:
-                    if (s1, s2) in self.dtwstMatrix.get_couples_to_dist():
-                        distance = self.dtwstMatrix.get_dist(s1, s2)[0]
-                        s2_class = self.correct_classification[s2]
-                        if s2_class in classes_sample_number:
-                            classes_sample_number[self.correct_classification[s2]]+=1
-                            classes_sum_value[self.correct_classification[s2]] += distance
-                        else:
-                            classes_sample_number[self.correct_classification[s2]] = 1
-                            classes_sum_value[self.correct_classification[s2]] = distance
+                    s2_class = self.correct_classification[s2]
+                    if s2_class in classes_sum_value:
+                        classes_sum_value[s2_class] += self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sample_number[s2_class] += 1
                     else:
-                        if s1 != s2:
-                            print('\nTHE COUPLE: ', s1, ' - ',s2,' IS NOT IN THE DATASET!!!\n')
+                        classes_sum_value[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sample_number[s2_class] = 1
             for k in classes_sum_value:
-                classes_avg_values[k] = classes_sum_value[k]/classes_sample_number[k]
-            min_avg_dist = numpy.inf
-            correct_class = ''
-            for k in classes_avg_values:
-                if classes_avg_values[k] < min_avg_dist:
-                    min_avg_dist = classes_avg_values[k]
-                    correct_class = k
-            classification[s1] = correct_class
+                avg_dist_dict[k] = classes_sum_value[k]/classes_sample_number[k]
+            classification[s1] = avg_dist_dict
+        return classification
+
+    def classify_by_avg_dist_connected_component(self, w=0.5):
+        classification = {}
+        for s1 in self.dtwstMatrix.get_label_set():
+            classes_sum_value = {}
+            classes_sum_component_factor = {}
+            classes_sample_number = {}
+            avg_dist_dict = {}
+            cf = 0
+            for s2 in self.dtwstMatrix.get_label_set():
+                if s1 != s2:
+                    s2_class = self.correct_classification[s2]
+                    d = self.dtwstMatrix.get_dist(s1, s2)
+                    cf = 1
+                    if d[1] != 0:
+                        cf = ((float(d[2])) / (float(d[1])))
+                    if s2_class in classes_sum_value:
+                        classes_sum_value[s2_class] += self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sample_number[s2_class] += 1.0
+                        classes_sum_component_factor[s2_class] += cf
+                    else:
+                        classes_sum_value[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sample_number[s2_class] = 1.0
+                        classes_sum_component_factor[s2_class] = cf
+            for k in classes_sum_value:
+                print('\n')
+                print(classes_sum_component_factor[k], classes_sample_number[k], classes_sum_component_factor[k]/classes_sample_number[k])
+                avg_dist_dict[k] = (classes_sum_value[k]/classes_sample_number[k])*(classes_sum_component_factor[k]/classes_sample_number[k])
+                # avg_dist_dict[k] = (classes_sum_value[k]/classes_sample_number[k])*1
+            classification[s1] = avg_dist_dict
         return classification
 
     def evaluate_classification(self, classification):
@@ -143,19 +144,10 @@ class DTWClassifier:
                     classes_correctness[self.get_correct_classification()[k]] = [1, 0]
                 else:
                     classes_correctness[self.get_correct_classification()[k]] = [0, 1]
-        print(classes_correctness)
+        # print(classes_correctness)
         return classes_correctness
 
 if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
     simple_min_dist_classification = classifier.classify_by_min_dist()
-    # simple_avg_dist_classification = classifier.classify_by_avg_dist()
-    # connected_component_min_dist = classifier.classify_by_min_dist_connected_components(1)
-    # print(classifier.get_correct_classification())
     print(simple_min_dist_classification)
-    # print(simple_avg_dist_classification)
-
-    # classifier.evaluate_classification(simple_min_dist_classification)
-    # classifier.evaluate_classification(simple_avg_dist_classification)
-    # print('\n\n\n\n')
-    # classifier.evaluate_classification(connected_component_min_dist)

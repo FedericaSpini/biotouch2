@@ -26,12 +26,12 @@ class DTWEvaluator:
 
     def plot_cms(self, classification):
         n_classes = self.classifier.get_classes_number()
-        # print('!!!!!!!!!!!!!!!!!!   ', n_classes)
         probe_to_classified_classes = self.make_class_order_from_classification(classification)
-        numbers = numpy.arange(n_classes*1.0)
+        # print('\n\n', probe_to_classified_classes, '\n\n')
+        numbers = numpy.arange((n_classes*1.0)+1.0)
         for i, n in enumerate(numbers):
             numbers[i] = numbers[i]/n_classes
-        correct_classified_samples = numpy.zeros(n_classes)
+        correct_classified_samples = numpy.zeros(n_classes+1)
         for probe in probe_to_classified_classes:
             correct_probe_class = self.classifier.get_correct_classification()[probe]
             correct_class_position = 0
@@ -44,18 +44,14 @@ class DTWEvaluator:
         for i, n in enumerate(correct_classified_samples):
             total += n
             correct_classified_samples[i] = total/1024
-        print(numbers)
-        print(correct_classified_samples)
-
         label = 'CMS : '+ str(self.integrate(correct_classified_samples, 0.03125))
-        # print('AREA IS: ', area)
-        plt.plot(numbers, correct_classified_samples, label=label)
+        plt.plot(numbers, correct_classified_samples, label=label, marker=".")
         x_label_indixes = []
         freq = 2
         for i, n in enumerate(numbers):
             if i % freq == 0:
                 x_label_indixes.append(n)
-        plt.xticks(x_label_indixes, numpy.arange(0, n_classes, freq))
+        plt.xticks(x_label_indixes, numpy.arange(0, n_classes+1, freq))
         plt.legend()
         plt.show()
         return numbers, correct_classified_samples
@@ -77,6 +73,10 @@ if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
     evaluator = DTWEvaluator(classifier)
     evaluator.plot_cms(classifier.classify_by_min_dist())
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components())
+    evaluator.plot_cms(classifier.classify_by_avg_dist())
+    evaluator.plot_cms(classifier.classify_by_avg_dist_connected_component())
+
 
 
 
