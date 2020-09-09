@@ -72,9 +72,17 @@ class DTWEvaluator:
 if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
     evaluator = DTWEvaluator(classifier)
-    evaluator.plot_cms(classifier.classify_by_min_dist())
-    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components())
-    evaluator.plot_cms(classifier.classify_by_avg_dist())
+    # evaluator.plot_cms(classifier.classify_by_min_dist())
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.75))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.5))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.25))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.1))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=4))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=7.5))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=10))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=15))
+
+    # evaluator.plot_cms(classifier.classify_by_avg_dist())
     evaluator.plot_cms(classifier.classify_by_avg_dist_connected_component())
 
 

@@ -16,12 +16,20 @@ from src.TimeSeriesManager import TimeSeriesManager
 class DTWClassifier:
 
     def __init__(self, dataset_name,  dtwstMatrix, update_data = False):
+        """
+        :param dataset_name: the name of the dataset whose data will be classified by tje DTWClassifier object
+        :param dtwstMatrix: a distance matrix given such a DTWDistMatrix object
+        :param update_data: a boolean wich specify if this object updates already existing data
+        """
         self.dm = AnonymousDataManager(dataset_name, update_data)
         self.time_series_manager = TimeSeriesManager(dataset_name, update_data)
         self.dtwstMatrix = dtwstMatrix
         self.correct_classification = self.get_correct_classification()
 
     def get_correct_classification(self):
+        """
+        :return: a dictiory wich maps probes'ids into the correct class label
+        """
         cc = {}
         classes = self.time_series_manager.get_samples_id()
         for label in self.dtwstMatrix.get_label_set():
@@ -29,9 +37,15 @@ class DTWClassifier:
         return cc
 
     def get_classes_number(self):
+        """
+        :return: the total number of classes
+        """
         return len(self.get_classes_set())
 
     def get_classes_set(self):
+        """
+        :return: the set containing all the classes'labels of the dataset
+        """
         classes_set = set()
         cc = self.get_correct_classification()
         for k in cc:
@@ -39,6 +53,10 @@ class DTWClassifier:
         return classes_set
 
     def classify_by_min_dist(self):
+        """
+        :return: a dictionary which maps each probe id into another dictionary that is: class name -> minimum distance
+                    of the probe to classes probe
+        """
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             min_dist_dict = {}
@@ -54,6 +72,10 @@ class DTWClassifier:
         return classification
 
     def classify_by_min_dist_connected_components(self, w=0.5):
+        """
+        :return: a dictionary which maps each probe id into another dictionary that is: class name -> minimum distance
+                    of the probe to classes probe, changed by the connected component factor
+        """
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             min_dist_dict = {}
@@ -64,11 +86,15 @@ class DTWClassifier:
                     if d[1] == 0:
                         dist = d[0]
                     else:
-                        # dist = d[0] * (1-((float(d[1])) / (float(d[2]))))
+                        # dist = d[0] * (1-((float(d[1])) / (float(d[2])))) OK
                         # dist = d[0] * (((float(d[1])) / (float(d[2]))))
                         # dist = d[0] * (((float(d[2])) / (float(d[1]))))
                         # dist = d[0]
-                        dist = (d[0]*(1-w)) + (d[0] * (1-((float(d[1])) / (float(d[2])))) * w)
+                        # dist = (d[0]*(1-w)) + (d[0] * (1-((float(d[1])) / (float(d[2])))) * w)
+                        # dist = d[0] * d[1]
+                        # dist = d[0] * (d[1]*w) #w should be between 0 and 1
+                        # dist = d[0] * (d[1]/w)
+                        dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
                         print('\n')
                         print(d, dist)
                     if s2_class in min_dist_dict:
@@ -103,7 +129,6 @@ class DTWClassifier:
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             classes_sum_value = {}
-            classes_sum_component_factor = {}
             classes_sample_number = {}
             avg_dist_dict = {}
             cf = 0
@@ -111,22 +136,17 @@ class DTWClassifier:
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     d = self.dtwstMatrix.get_dist(s1, s2)
-                    cf = 1
+                    dist = d[0]
                     if d[1] != 0:
-                        cf = ((float(d[2])) / (float(d[1])))
+                        dist = d[0] * (((float(d[2])) / (float(d[1]))))
                     if s2_class in classes_sum_value:
-                        classes_sum_value[s2_class] += self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sum_value[s2_class] += dist
                         classes_sample_number[s2_class] += 1.0
-                        classes_sum_component_factor[s2_class] += cf
                     else:
-                        classes_sum_value[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        classes_sum_value[s2_class] = dist
                         classes_sample_number[s2_class] = 1.0
-                        classes_sum_component_factor[s2_class] = cf
             for k in classes_sum_value:
-                print('\n')
-                print(classes_sum_component_factor[k], classes_sample_number[k], classes_sum_component_factor[k]/classes_sample_number[k])
-                avg_dist_dict[k] = (classes_sum_value[k]/classes_sample_number[k])*(classes_sum_component_factor[k]/classes_sample_number[k])
-                # avg_dist_dict[k] = (classes_sum_value[k]/classes_sample_number[k])*1
+                avg_dist_dict[k] = (classes_sum_value[k]/classes_sample_number[k])
             classification[s1] = avg_dist_dict
         return classification
 
