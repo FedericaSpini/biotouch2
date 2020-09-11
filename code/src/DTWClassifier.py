@@ -83,20 +83,21 @@ class DTWClassifier:
                 if (s1 != s2):
                     s2_class = self.correct_classification[s2]
                     d = self.dtwstMatrix.get_dist(s1, s2)
-                    if d[1] == 0:
-                        dist = d[0]
-                    else:
+                    dist = (d[0] * (1-w)) + (d[0] * w * ((float(d[2]) / (float(d[2]) - float(d[1])))))
+                    # if d[1] == 0:
+                    #     dist = d[0]
+                    # else:
                         # dist = d[0] * (1-((float(d[1])) / (float(d[2])))) OK
-                        # dist = d[0] * (((float(d[1])) / (float(d[2]))))
-                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))
-                        # dist = d[0]
-                        # dist = (d[0]*(1-w)) + (d[0] * (1-((float(d[1])) / (float(d[2])))) * w)
+                        # dist = d[0] * (((float(d[1])) / (float(d[2]))))  OK
+                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))   OK
+                        # dist = d[0] * ((float(d[2]) / (float(d[2]) - float(d[1]))))
+                        # dist = d[0]   OK
                         # dist = d[0] * d[1]
                         # dist = d[0] * (d[1]*w) #w should be between 0 and 1
                         # dist = d[0] * (d[1]/w)
-                        dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
-                        print('\n')
-                        print(d, dist)
+                        # dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
+                        # dist = (d[0] * (1-w)) + ((float(d[2]) / (float(d[2]) - float(d[1]))) * w * d[0])
+                        # print(d, dist)
                     if s2_class in min_dist_dict:
                         if self.dtwstMatrix.get_dist(s1, s2)[0] < min_dist_dict[s2_class]:
                             min_dist_dict[s2_class] = dist
@@ -131,14 +132,21 @@ class DTWClassifier:
             classes_sum_value = {}
             classes_sample_number = {}
             avg_dist_dict = {}
-            cf = 0
             for s2 in self.dtwstMatrix.get_label_set():
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     d = self.dtwstMatrix.get_dist(s1, s2)
-                    dist = d[0]
-                    if d[1] != 0:
-                        dist = d[0] * (((float(d[2])) / (float(d[1]))))
+                    # dist = d[0]
+                    dist = d[0] + (d[0] * (d[1] / w))
+                    # if d[1] != 0:
+                        # dist = d[0] * ((float(d[2]) / (float(d[2]) - float(d[1]))))
+                        # dist = d[0] * d[1]
+                        # dist = d[0] * (d[1]/w)
+                        # dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
+                        # dist = (d[0] * (1 - w)) + ((float(d[2]) / (float(d[2]) - float(d[1]))) * w * d[0])
+                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))
+                        # dist = (d[0] * (1 - (((float(d[2])-(float(d[1]))) / (float(d[2]))))) * w) + (d[0]*(1-w))
+                        # dist = (d[0] * (1 - (float(d[2])/ float(d[1]))) * w) + (d[0]*(1-w))
                     if s2_class in classes_sum_value:
                         classes_sum_value[s2_class] += dist
                         classes_sample_number[s2_class] += 1.0
