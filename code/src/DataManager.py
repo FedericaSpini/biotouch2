@@ -218,11 +218,18 @@ class AnonymousDataManager:
 if __name__ == '__main__':
     d = AnonymousDataManager(Utils.MINI_DATASET_NAME, update_data=False)
 
-    print(d.dataset_name, "\n\n")
-    print(type(d.data_frames['wordid_userid_map']),d.data_frames.keys(), "\n\n")
+    # print(d.dataset_name, "\n\n")
+    # print(type(d.data_frames['wordid_userid_map']),d.data_frames.keys(), "\n\n")
 
-    # print(d.data_frames['wordid_userid_map'])
-    print(d.data_frames['movementPoints'][['x', 'y', 'time']])
+    # print(d.data_frames['userid_userdata_map'][4], d.data_frames['userid_userdata_map'][4])
+    for k in d.data_frames.keys():
+        print(k)
+        print('\n')
+        print(d.data_frames[k])
+    # print(d.data_frames['movementPoints'][['x', 'y', 'time']])
+    # print('\n')
+    # print(d.data_frames.keys())
+
     # a = Utils.get_wordidfrom_wordnumber_name_surname(d[Utils.WORDID_USERID], d[Utils.USERID_USERDATA], "Rita", "Battilocchi" , Utils.BLOCK_LETTER, 31)
     # print(Utils.get_infos(d[Utils.WORDID_USERID], d[Utils.USERID_USERDATA], a))
     # d._generate_example_charts()

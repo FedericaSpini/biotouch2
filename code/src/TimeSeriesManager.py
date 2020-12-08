@@ -55,4 +55,8 @@ class TimeSeriesManager:
 
 
 if __name__ == '__main__':
-    TimeSeriesManager(Utils.DATASET_NAME, update_data=True, update_features=True)
+    ts = TimeSeriesManager(Utils.DATASET_NAME, update_data=True, update_features=True)
+    print('\n\n\n')
+    for label in Utils.POINTS_SERIES_TYPE:
+        print('\nlabel = ', label)
+        print(type(ts.data_series[label][0]), ts.data_series[label][0])

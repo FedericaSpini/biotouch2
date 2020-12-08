@@ -28,17 +28,17 @@ class DTWEvaluator:
         n_classes = self.classifier.get_classes_number()
         probe_to_classified_classes = self.make_class_order_from_classification(classification)
         # print('\n\n', probe_to_classified_classes, '\n\n')
-        numbers = numpy.arange((n_classes*1.0)+1.0)
+        numbers = numpy.arange(1, (n_classes*1.0)+1.0)
         for i, n in enumerate(numbers):
             numbers[i] = numbers[i]/n_classes
-        correct_classified_samples = numpy.zeros(n_classes+1)
+        correct_classified_samples = numpy.zeros(n_classes)
         for probe in probe_to_classified_classes:
             correct_probe_class = self.classifier.get_correct_classification()[probe]
             correct_class_position = 0
             for c in probe_to_classified_classes[probe]:
                 correct_class_position += 1
                 if c[0] == correct_probe_class:
-                    correct_classified_samples[correct_class_position] +=1
+                    correct_classified_samples[correct_class_position-1] +=1
                     break
         total = 0
         for i, n in enumerate(correct_classified_samples):
@@ -51,7 +51,8 @@ class DTWEvaluator:
         for i, n in enumerate(numbers):
             if i % freq == 0:
                 x_label_indixes.append(n)
-        plt.xticks(x_label_indixes, numpy.arange(0, n_classes+1, freq))
+        plt.xticks(x_label_indixes, numpy.arange(1, n_classes+1, freq))
+        plt.yticks(numbers)
         plt.legend()
         plt.show()
         return numbers, correct_classified_samples
@@ -68,21 +69,62 @@ class DTWEvaluator:
         return total * (h / 3.0)
 
 
+    def plot_far_frr_1_vs_all(self, classification, threshold_min, threshold_max):
+        # n_classes = self.classifier.get_classes_number()
+        threshold_values = numpy.arange(threshold_min, threshold_max, 100).tolist()
+        print(threshold_values)
+        far_list = []
+        frr_list = []
+        for threshold in threshold_values:
+            # print(classification.keys())
+            genuine_accepted = 0
+            genuine_refused = 0
+            false_accepted = 0
+            false_refused = 0
+            for probe in classification.keys():
+                correct_probe_class = self.classifier.get_correct_classification()[probe]
+                classification_probe = classification[probe]
+                for class_name in classification_probe:
+                    if class_name == correct_probe_class:
+                        if classification_probe[class_name] <= threshold:
+                            genuine_accepted += 1
+                        else:
+                            false_refused += 1
+                    else:
+                        if classification_probe[class_name] <= threshold:
+                            false_accepted +=1
+                        else:
+                            genuine_refused +=1
+            far_list += [false_accepted / (genuine_refused + false_accepted)]
+            frr_list += [false_refused / (genuine_accepted + false_refused)]
+        print(len(far_list), len(frr_list), len(threshold_values))
+        print(far_list, '\n', frr_list)
+        plt.plot( numpy.arange(threshold_min, threshold_max, 100), far_list, label='FAR')
+        plt.plot(numpy.arange(threshold_min, threshold_max, 100), frr_list, label='FRR')
+
+        plt.legend()
+        plt.show()
+
 
 if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
     evaluator = DTWEvaluator(classifier)
+
+    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_min_dist(), 3000, 25000)
+    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist(), 3000, 25000)
+    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist_connected_component(), 3000, 25000)
+
     # evaluator.plot_cms(classifier.classify_by_min_dist())
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=1))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.75))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.5))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.25))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.1))
-    evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=1.5))
-    evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=2))
-    evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=4))
-    evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=7.5))
-    evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=10))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=1.5))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=2))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=4))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=7.5))
+    # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=10))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=15))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=20))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=30))

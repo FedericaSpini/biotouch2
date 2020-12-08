@@ -71,6 +71,14 @@ class DTWClassifier:
             classification[s1] = min_dist_dict
         return classification
 
+    # def filter_by_class(self, classification, class_key):
+    #     """
+    #     :return: a dictionary that maps e
+    #     """
+    #     filtered_classification = {}
+    #     filtered_classification[class_key] = classification[class_key]
+    #     return filtered_classification
+
     def classify_by_min_dist_connected_components(self, w=0.5):
         """
         :return: a dictionary which maps each probe id into another dictionary that is: class name -> minimum distance
@@ -178,4 +186,11 @@ class DTWClassifier:
 if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
     simple_min_dist_classification = classifier.classify_by_min_dist()
-    print(simple_min_dist_classification)
+    for k in simple_min_dist_classification:
+        print(type(k), k, type(simple_min_dist_classification[k]), simple_min_dist_classification[k])
+    # single_class_value = classifier.filter_by_class(simple_min_dist_classification, 'u9_was-lx1a_0_BLOCK_LETTERS')
+    # print(single_class_value)
+    #
+    # simple_avg_dist_classification = classifier.classify_by_min_dist()
+    # single_class_value_avg = classifier.filter_by_class(simple_avg_dist_classification, 'u9_was-lx1a_0_BLOCK_LETTERS')
+    # print(single_class_value_avg)
