@@ -75,7 +75,11 @@ class DTWEvaluator:
         print(threshold_values)
         far_list = []
         frr_list = []
-        for threshold in threshold_values:
+        eer = numpy.inf
+        eer_threshold_index = numpy.inf
+        eer_threshold_value = numpy.inf
+        far_diff_from_frr = numpy.inf
+        for idx, threshold in enumerate(threshold_values):
             # print(classification.keys())
             genuine_accepted = 0
             genuine_refused = 0
@@ -95,13 +99,19 @@ class DTWEvaluator:
                             false_accepted +=1
                         else:
                             genuine_refused +=1
+            if abs((false_accepted / (genuine_refused + false_accepted))-(false_refused / (genuine_accepted + false_refused))) < far_diff_from_frr:
+                far_diff_from_frr = abs((false_accepted / (genuine_refused + false_accepted))-(false_refused / (genuine_accepted + false_refused)))
+                eer = ((false_accepted / (genuine_refused + false_accepted))+(false_refused / (genuine_accepted + false_refused)))/2
+                # eer_threshold_index = idx
+                eer_threshold_value = threshold
             far_list += [false_accepted / (genuine_refused + false_accepted)]
             frr_list += [false_refused / (genuine_accepted + false_refused)]
         print(len(far_list), len(frr_list), len(threshold_values))
         print(far_list, '\n', frr_list)
         plt.plot( numpy.arange(threshold_min, threshold_max, 100), far_list, label='FAR')
         plt.plot(numpy.arange(threshold_min, threshold_max, 100), frr_list, label='FRR')
-
+        plt.scatter(eer_threshold_value, eer, color=None, edgecolor=None)
+        plt.annotate("eer: "+ str(eer)[:6], (eer_threshold_value+1000, eer))
         plt.legend()
         plt.show()
 
@@ -112,6 +122,7 @@ if __name__ == '__main__':
 
     evaluator.plot_far_frr_1_vs_all(classifier.classify_by_min_dist(), 3000, 25000)
     evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist(), 3000, 25000)
+    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_max_dist(), 3000, 25000)
     evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist_connected_component(), 3000, 25000)
 
     # evaluator.plot_cms(classifier.classify_by_min_dist())

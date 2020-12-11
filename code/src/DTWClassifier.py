@@ -71,13 +71,25 @@ class DTWClassifier:
             classification[s1] = min_dist_dict
         return classification
 
-    # def filter_by_class(self, classification, class_key):
-    #     """
-    #     :return: a dictionary that maps e
-    #     """
-    #     filtered_classification = {}
-    #     filtered_classification[class_key] = classification[class_key]
-    #     return filtered_classification
+    def classify_by_max_dist(self):
+        """
+        :return: a dictionary which maps each probe id into another dictionary that is: class name -> maximum distance
+                    of the probe to classes probe
+        """
+        classification = {}
+        for s1 in self.dtwstMatrix.get_label_set():
+            max_dist_dict = {}
+            for s2 in self.dtwstMatrix.get_label_set():
+                if s1 != s2:
+                    s2_class = self.correct_classification[s2]
+                    if s2_class in max_dist_dict:
+                        if self.dtwstMatrix.get_dist(s1, s2)[0] > max_dist_dict[s2_class]:
+                            max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                    else:
+                        max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+            classification[s1] = max_dist_dict
+        return classification
+
 
     def classify_by_min_dist_connected_components(self, w=0.5):
         """
