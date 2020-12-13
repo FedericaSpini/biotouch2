@@ -2,6 +2,8 @@ import operator
 
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
 
 
 from src import Utils
@@ -27,7 +29,6 @@ class DTWEvaluator:
     def plot_cms(self, classification):
         n_classes = self.classifier.get_classes_number()
         probe_to_classified_classes = self.make_class_order_from_classification(classification)
-        # print('\n\n', probe_to_classified_classes, '\n\n')
         numbers = numpy.arange(1, (n_classes*1.0)+1.0)
         for i, n in enumerate(numbers):
             numbers[i] = numbers[i]/n_classes
@@ -108,24 +109,32 @@ class DTWEvaluator:
             frr_list += [false_refused / (genuine_accepted + false_refused)]
         print(len(far_list), len(frr_list), len(threshold_values))
         print(far_list, '\n', frr_list)
-        plt.plot( numpy.arange(threshold_min, threshold_max, 100), far_list, label='FAR')
-        plt.plot(numpy.arange(threshold_min, threshold_max, 100), frr_list, label='FRR')
-        plt.scatter(eer_threshold_value, eer, color=None, edgecolor=None)
+
+        plt.plot( numpy.arange(threshold_min, threshold_max, 100), far_list, label='FAR', color='darkcyan')
+        plt.plot(numpy.arange(threshold_min, threshold_max, 100), frr_list, label='FRR', color='brown')
+        plt.scatter(eer_threshold_value, eer, color='red', edgecolor=None)
         plt.annotate("eer: "+ str(eer)[:6], (eer_threshold_value+1000, eer))
         plt.legend()
+        plt.xlabel('Threshold value')
         plt.show()
 
 
 if __name__ == '__main__':
     classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME).get_matrix('movementPoints_filtered_by_x_y'))
+    time_classifier = DTWClassifier(Utils.DATASET_NAME, DTWDistMatrixManager(Utils.DATASET_NAME, res_path=Utils.RES_FOLDER_PATH+Utils.FINAL_DTW_DISTANCES_TIME).get_matrix('movementPoints_filtered_by_time'))
+
     evaluator = DTWEvaluator(classifier)
 
-    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_min_dist(), 3000, 25000)
-    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist(), 3000, 25000)
-    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_max_dist(), 3000, 25000)
-    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist_connected_component(), 3000, 25000)
+    evaluator.plot_far_frr_1_vs_all(classifier.classify_by_min_dist(), 0, 20000)
+    # evaluator.plot_far_frr_1_vs_all(time_classifier.classify_by_min_dist(), 0, 20000)
 
-    # evaluator.plot_cms(classifier.classify_by_min_dist())
+    # evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist(), 3000, 25000)
+    # evaluator.plot_far_frr_1_vs_all(classifier.classify_by_max_dist(), 3000, 25000)
+    # evaluator.plot_far_frr_1_vs_all(classifier.classify_by_avg_dist_connected_component(), 3000, 25000)
+
+
+
+    evaluator.plot_cms(classifier.classify_by_min_dist())
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=1))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.75))
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components(w=0.5))
@@ -155,7 +164,7 @@ if __name__ == '__main__':
 
     # evaluator.plot_cms(classifier.classify_by_min_dist_connected_components())
 
-    # evaluator.plot_cms(classifier.classify_by_avg_dist())
+    evaluator.plot_cms(classifier.classify_by_avg_dist())
     # evaluator.plot_cms(classifier.classify_by_avg_dist_connected_component(w=1))
     # evaluator.plot_cms(classifier.classify_by_avg_dist_connected_component(w=0.75))
     # evaluator.plot_cms(classifier.classify_by_avg_dist_connected_component(w=0.5))
