@@ -30,9 +30,8 @@ class DTWDistMatrixManager:
 
 
 if __name__ == '__main__':
-    # matrix = DTWDistMatrixManager(Utils.DATASET_NAME)
     matrix2 = DTWDistMatrixManager(Utils.DATASET_NAME, res_path=Utils.RES_FOLDER_PATH+Utils.FINAL_DTW_DISTANCES_TIME)
-    print(matrix2.matrixes, matrix2.res_path)
-    print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(1,2))
-    print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(2,1))
-    print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(1, 1999))
+    # print(matrix2.matrixes, matrix2.res_path)
+    # print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(1,2))
+    # print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(2,1))
+    # print(matrix2.get_matrix('movementPoints_filtered_by_time').get_dist(1, 1999))

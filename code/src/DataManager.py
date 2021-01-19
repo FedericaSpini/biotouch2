@@ -5,6 +5,7 @@ import pandas
 
 import src.Chronometer as Chronom
 import src.Utils as Utils
+from src import Constants
 
 DATAFRAME_FROM_JSON = [Utils.WORDID_USERID, Utils.USERID_USERDATA] + Utils.INITIAL_POINTS_SERIES_TYPE
 # DATAFRAMES = [Utils.WORDID_USERID, Utils.USERID_USERDATA] + Utils.POINTS_SERIES_TYPE
@@ -22,13 +23,13 @@ class AnonymousDataManager:
     @staticmethod
     def _dict_of_list_from_untimed_points(word_id, _, points_data):
         points_dict = Utils.init_dict(Utils.POINTS_WITH_WORD_ID, sum((len(x) for x in points_data)))
-        counter = 0
+        counter = Constants.ZERO
         for current_component, points in enumerate(points_data):
             for point in points:
                 points_dict[Utils.WORD_ID][counter] = word_id
                 for label in Utils.POINTS:
                     points_dict[label][counter] = point[label] if label is not Utils.COMPONENT else current_component
-                counter += 1
+                counter += Constants.ONE
         return points_dict
 
     @staticmethod
@@ -119,8 +120,6 @@ class AnonymousDataManager:
         else:
             self._generate_dataframes()
             self._save_dataframes()
-            # todo: trasferisci la funzione omonima dal vecchio DataManeger
-            # self._generate_example_charts()
 
     def _generate_dataframes(self):
         self._load_jsons()
@@ -132,7 +131,7 @@ class AnonymousDataManager:
             self.dataset_name)), "Insert the dataset \"" + self.dataset_name + "\" in: " + Utils.BASE_FOLDER
 
         chrono = Chronom.Chrono("Reading json files...")
-        files_counter = 0
+        files_counter = Constants.ZERO
         for root, dirs, files in Utils.os.walk(Utils.BUILD_DATASET_FOLDER(self.dataset_name), True, None, False):
             for json_file in sorted(files, key=Utils.natural_keys):
                 if json_file and json_file.endswith(Utils.JSON_EXTENSION):
@@ -145,7 +144,7 @@ class AnonymousDataManager:
     def _create_dataframes(self):
         assert self._jsons_data
         # _jsons_data è un dizionario, le cui chiavi sono: ['date', 'movementPoints', 'sampledPoints', 'sessionData', 'touchDownPoints', 'touchUpPoints', 'wordNumber']
-        print("\n\n\n\n", type(self._jsons_data), type(self._jsons_data[0]))
+        print("\n\n\n\n", type(self._jsons_data), type(self._jsons_data[Constants.ZERO]))
         chrono = Chronom.Chrono("Creating dataframes...")
         for word_id, single_word_data in enumerate(self._jsons_data):
             self._idword_dataword_mapping[word_id] = single_word_data
@@ -162,11 +161,6 @@ class AnonymousDataManager:
         for label, d in self._data_dicts.items():
 
             self.data_frames[label] = self._dict_to_frames_funs[label](d)
-            # if (label == Utils.USERID_USERDATA):
-            #     print("ECCOLO")
-            #     print(self._dict_to_frames_funs[label](d).columns.values)
-            #     print(d.keys())
-            #     print(self.data_frames[label].columns.values)
 
 
         self.data_frames[Utils.USERID_USERDATA][Utils.USER_CODE] = self.data_frames[Utils.USERID_USERDATA][
@@ -176,15 +170,15 @@ class AnonymousDataManager:
     def _group_compute_offsets(self, group):
         minX = group[Utils.X].min()
         minY = group[Utils.Y].min()
-        self.shift_offsets[group[Utils.WORD_ID].iloc[0]] = (minX, minY)
+        self.shift_offsets[group[Utils.WORD_ID].iloc[Constants.ZERO]] = (minX, minY)
 
     def _group_shift_x(self, group):
-        m = self.shift_offsets[group[Utils.WORD_ID].iloc[0]][0]
+        m = self.shift_offsets[group[Utils.WORD_ID].iloc[Constants.ZERO]][Constants.ZERO]
         group[Utils.X] = group[Utils.X] - m
         return group
 
     def _group_shift_y(self, group):
-        m = self.shift_offsets[group[Utils.WORD_ID].iloc[0]][1]
+        m = self.shift_offsets[group[Utils.WORD_ID].iloc[Constants.ZERO]][Constants.ONE]
         group[Utils.Y] = group[Utils.Y] - m
         return group
 

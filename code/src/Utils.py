@@ -7,10 +7,8 @@ from src.Constants import *
 def atoi(text):
     return int(text) if text.isdigit() else text
 
-
 def natural_keys(text):
     return [atoi(c) for c in re.split('(\d+)', text)]
-
 
 def merge_dicts(dict1: dict, dict2: dict):
     assert set(dict1.keys()) == set(dict2.keys())
@@ -19,7 +17,6 @@ def merge_dicts(dict1: dict, dict2: dict):
         assert isinstance(dict2[key], list)
         dict1[key] += dict2[key]
     return dict1
-
 
 def flat_nested_dict(dict_to_flat: dict):
     d = {}
@@ -30,13 +27,11 @@ def flat_nested_dict(dict_to_flat: dict):
             d.update(flat_nested_dict(v))
     return d
 
-
 def make_lists_values(d: dict):
     for k, v in d.items():
         if not isinstance(v, list):
             d[k] = [v]
     return d
-
 
 def add_column(dataframe, column):
     if WORD_ID in dataframe.columns:
@@ -44,11 +39,9 @@ def add_column(dataframe, column):
     else:
         return dataframe.join(column)
 
-
 def dataframe_to_csv(dataframe, dataset_name, path):
     mkdir(BUILD_CSV_FOLDER(dataset_name))
     dataframe.to_csv(path, decimal=",", sep=";")
-
 
 def save_dataframes(dataset_name, dataframes_dict, dataframe_type, message, to_csv, frames_to_add_column, csv_column):
     mkdir(BUILD_GENERATED_FOLDER(dataset_name))
@@ -60,7 +53,6 @@ def save_dataframes(dataset_name, dataframes_dict, dataframe_type, message, to_c
                 v = add_column(v, csv_column)
             dataframe_to_csv(v, dataset_name, PATHS_FUN[dataframe_type][CSV_EXTENSION](dataset_name, label))
     chrono.end()
-
 
 def init_dict(labels, length):
     return {x: [None] * length for x in labels}

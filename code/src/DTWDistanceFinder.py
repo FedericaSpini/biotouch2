@@ -67,7 +67,6 @@ class DTWDistanceFinder:
             point1 = s1.iloc[i].to_numpy()
             for j in range(0, m):
                 point2 = s2.iloc[j].to_numpy()
-                # p1_p2_dist = distance.euclidean(point1, point2)
                 p1_p2_dist = math.sqrt(((point1[0]-point2[0])**2)+(point1[1]-point2[1])**2)
                 if (i == 0) and (j > 0):
                     matrix[i][j] = p1_p2_dist + matrix[i][j-1]
@@ -96,8 +95,6 @@ class DTWDistanceFinder:
             point1 = s1.iloc[i].to_numpy()
             for j in range(0, m):
                 point2 = s2.iloc[j].to_numpy()
-                # p1_p2_dist = numpy.linalg.norm(point1-point2)
-                # p1_p2_dist = distance.euclidean(point1, point2)
                 p1_p2_dist = math.sqrt(((point1[0]-point2[0])**2)+(point1[1]-point2[1])**2)
                 if (i == 0) and (j > 0):
                     matrix[i][j] = p1_p2_dist + matrix[i][j-1]

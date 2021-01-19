@@ -13,7 +13,6 @@ class DTWDistMatrix:
         self.couples_to_dist = {}
         self.label_set = set()
         self._load_data(dir)
-        # print(self.couples_to_dist)
 
 
     def _load_data(self, dir):
@@ -31,7 +30,6 @@ class DTWDistMatrix:
 
     def get_dist (self, s1, s2):
         dist = self.couples_to_dist[(s1,s2)]
-        # print(dist)
         return dist
 
     def get_label_set(self):

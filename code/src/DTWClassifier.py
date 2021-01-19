@@ -7,6 +7,7 @@ import os
 import numpy
 import src.Chronometer as Chronom
 import src.Utils as Utils
+from src import Constants
 from src.DTWDistMatrix import DTWDistMatrix
 from src.DTWDistMatrixManager import DTWDistMatrixManager
 from src.DataManager import AnonymousDataManager
@@ -64,10 +65,10 @@ class DTWClassifier:
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     if s2_class in min_dist_dict:
-                        if self.dtwstMatrix.get_dist(s1, s2)[0] < min_dist_dict[s2_class]:
-                            min_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        if self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO] < min_dist_dict[s2_class]:
+                            min_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
                     else:
-                        min_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        min_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
             classification[s1] = min_dist_dict
         return classification
 
@@ -83,10 +84,10 @@ class DTWClassifier:
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     if s2_class in max_dist_dict:
-                        if self.dtwstMatrix.get_dist(s1, s2)[0] > max_dist_dict[s2_class]:
-                            max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        if self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO] > max_dist_dict[s2_class]:
+                            max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
                     else:
-                        max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
+                        max_dist_dict[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
             classification[s1] = max_dist_dict
         return classification
 
@@ -103,23 +104,12 @@ class DTWClassifier:
                 if (s1 != s2):
                     s2_class = self.correct_classification[s2]
                     d = self.dtwstMatrix.get_dist(s1, s2)
-                    dist = (d[0] * (1-w)) + (d[0] * w * ((float(d[2]) / (float(d[2]) - float(d[1])))))
-                    # if d[1] == 0:
-                    #     dist = d[0]
-                    # else:
-                        # dist = d[0] * (1-((float(d[1])) / (float(d[2])))) OK
-                        # dist = d[0] * (((float(d[1])) / (float(d[2]))))  OK
-                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))   OK
-                        # dist = d[0] * ((float(d[2]) / (float(d[2]) - float(d[1]))))
-                        # dist = d[0]   OK
-                        # dist = d[0] * d[1]
-                        # dist = d[0] * (d[1]*w) #w should be between 0 and 1
-                        # dist = d[0] * (d[1]/w)
-                        # dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
-                        # dist = (d[0] * (1-w)) + ((float(d[2]) / (float(d[2]) - float(d[1]))) * w * d[0])
-                        # print(d, dist)
+                    if d[Constants.ONE] == Constants.ZERO:
+                        dist = d[Constants.ZERO]
+                    else:
+                        dist = d[Constants.ZERO] + (d[Constants.ZERO]*(d[Constants.ONE]/w))
                     if s2_class in min_dist_dict:
-                        if self.dtwstMatrix.get_dist(s1, s2)[0] < min_dist_dict[s2_class]:
+                        if self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO] < min_dist_dict[s2_class]:
                             min_dist_dict[s2_class] = dist
                     else:
                         min_dist_dict[s2_class] = dist
@@ -127,6 +117,10 @@ class DTWClassifier:
         return classification
 
     def classify_by_avg_dist(self):
+        """
+        :return: a dictionary which maps each probe id into another dictionary that is: class name -> average distance
+                    of the probe to classes probe
+        """
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             classes_sum_value = {}
@@ -136,17 +130,21 @@ class DTWClassifier:
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     if s2_class in classes_sum_value:
-                        classes_sum_value[s2_class] += self.dtwstMatrix.get_dist(s1, s2)[0]
-                        classes_sample_number[s2_class] += 1
+                        classes_sum_value[s2_class] += self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
+                        classes_sample_number[s2_class] += Constants.ONE
                     else:
-                        classes_sum_value[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[0]
-                        classes_sample_number[s2_class] = 1
+                        classes_sum_value[s2_class] = self.dtwstMatrix.get_dist(s1, s2)[Constants.ZERO]
+                        classes_sample_number[s2_class] = Constants.ONE
             for k in classes_sum_value:
                 avg_dist_dict[k] = classes_sum_value[k]/classes_sample_number[k]
             classification[s1] = avg_dist_dict
         return classification
 
     def classify_by_avg_dist_connected_component(self, w=0.5):
+        """
+        :return: a dictionary which maps each probe id into another dictionary that is: class name -> average distance
+                    of the probe to classes probe, changed by the connected component factor
+        """
         classification = {}
         for s1 in self.dtwstMatrix.get_label_set():
             classes_sum_value = {}
@@ -156,17 +154,10 @@ class DTWClassifier:
                 if s1 != s2:
                     s2_class = self.correct_classification[s2]
                     d = self.dtwstMatrix.get_dist(s1, s2)
-                    # dist = d[0]
-                    dist = d[0] + (d[0] * (d[1] / w))
-                    # if d[1] != 0:
-                        # dist = d[0] * ((float(d[2]) / (float(d[2]) - float(d[1]))))
-                        # dist = d[0] * d[1]
-                        # dist = d[0] * (d[1]/w)
-                        # dist = (d[0]*(1-w)) + (d[0] * ((float(d[1])) / (float(d[2]))) * w)
-                        # dist = (d[0] * (1 - w)) + ((float(d[2]) / (float(d[2]) - float(d[1]))) * w * d[0])
-                        # dist = d[0] * (((float(d[2])) / (float(d[1]))))
-                        # dist = (d[0] * (1 - (((float(d[2])-(float(d[1]))) / (float(d[2]))))) * w) + (d[0]*(1-w))
-                        # dist = (d[0] * (1 - (float(d[2])/ float(d[1]))) * w) + (d[0]*(1-w))
+                    if d[Constants.ONE] == Constants.ZERO:
+                        dist = d[Constants.ZERO]
+                    else:
+                        dist = d[Constants.ZERO] + (d[Constants.ZERO]*(d[Constants.ONE]/w))
                     if s2_class in classes_sum_value:
                         classes_sum_value[s2_class] += dist
                         classes_sample_number[s2_class] += 1.0
@@ -184,15 +175,14 @@ class DTWClassifier:
             k_correctness = classification[k] == self.get_correct_classification()[k]
             if self.get_correct_classification()[k] in classes_correctness:
                 if k_correctness:
-                    classes_correctness[self.get_correct_classification()[k]][0] += 1
+                    classes_correctness[self.get_correct_classification()[k]][Constants.ZERO] += Constants.ONE
                 else:
-                    classes_correctness[self.get_correct_classification()[k]][1] += 1
+                    classes_correctness[self.get_correct_classification()[k]][Constants.ONE] += Constants.ONE
             else:
                 if k_correctness:
-                    classes_correctness[self.get_correct_classification()[k]] = [1, 0]
+                    classes_correctness[self.get_correct_classification()[k]] = [Constants.ONE, Constants.ZERO]
                 else:
-                    classes_correctness[self.get_correct_classification()[k]] = [0, 1]
-        # print(classes_correctness)
+                    classes_correctness[self.get_correct_classification()[k]] = [Constants.ZERO, Constants.ONE]
         return classes_correctness
 
 if __name__ == '__main__':
